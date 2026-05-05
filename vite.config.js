@@ -8,4 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/sistema-colas-clinica/', // <-- Solo agregamos esta línea
 })
