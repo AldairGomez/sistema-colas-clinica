@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { HashRouter, Routes, Route, Link } from 'react-router-dom'
 import TV from './pages/TV'
 import Panel from './pages/Panel'
 import Paciente from './pages/Paciente'
@@ -27,14 +27,14 @@ function Home() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tv" element={<TV />} />
         <Route path="/panel" element={<Panel />} />
         <Route path="/paciente" element={<Paciente />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
