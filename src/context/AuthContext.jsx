@@ -9,14 +9,12 @@ export const AuthProvider = ({ children }) => {
     const [cargandoAuth, setCargandoAuth] = useState(true);
 
     useEffect(() => {
-        // 1. Revisar si hay una sesión guardada en el navegador (al recargar la página)
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             if (session) obtenerPerfil(session.user.id);
             else setCargandoAuth(false);
         });
 
-        // 2. Escuchar cuando el usuario hace Login o Logout
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             if (session) obtenerPerfil(session.user.id);
@@ -30,9 +28,17 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const obtenerPerfil = async (userId) => {
-        // Consultamos la tabla 'perfiles' que creaste en Supabase para saber su rol y área
-        const { data } = await supabase.from('perfiles').select('*').eq('id', userId).single();
-        setPerfil(data);
+        const { data, error } = await supabase.from('perfiles').select('*').eq('id', userId).single();
+
+        // --- EL ESCUDO ANTI-PANTALLA CONGELADA ---
+        if (error || !data) {
+            alert("⚠️ Login exitoso, pero tu usuario no tiene un ROL asignado en la base de datos. El Administrador debe registrarte en la tabla 'perfiles'.");
+            await supabase.auth.signOut();
+            setSession(null);
+            setPerfil(null);
+        } else {
+            setPerfil(data);
+        }
         setCargandoAuth(false);
     };
 

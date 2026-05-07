@@ -4,9 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
-  base: '/sistema-colas-clinica/', // <-- Esta es la línea que faltaba
+  plugins: [react(), tailwindcss()],
+  base: '/sistema-colas-clinica/',
 })
