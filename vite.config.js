@@ -8,5 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: '/sistema-colas-clinica/', // <-- Solo agregamos esta línea
+  base: '/sistema-colas-clinica/', // <-- Esta es la línea que faltaba
 })

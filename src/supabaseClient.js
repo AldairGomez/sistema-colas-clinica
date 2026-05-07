@@ -1,8 +1,30 @@
-// src/supabaseClient.js
 import { createClient } from '@supabase/supabase-js'
 
-// Reemplaza esto con la URL y la Key de tu proyecto en Supabase
-const supabaseUrl = 'https://immlqldjdrgaituledea.supabase.co'
-const supabaseAnonKey = 'sb_publishable_paYTh9a44vOiOYcWaVdXcA_cn0PBWUl' // Usa la anon/public key
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL; // Asegúrate de tener tus variables de entorno correctas
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Creamos un adaptador inteligente para guardar la sesión
+const almacenamientoDinamico = {
+    getItem: (key) => {
+        // Busca la llave en cualquiera de los dos almacenamientos
+        return window.localStorage.getItem(key) || window.sessionStorage.getItem(key);
+    },
+    setItem: (key, value) => {
+        // Si el usuario marcó el check, lo guardamos permanentemente. Si no, en la memoria volátil.
+        if (window.localStorage.getItem('recordar_sesion') === 'true') {
+            window.localStorage.setItem(key, value);
+        } else {
+            window.sessionStorage.setItem(key, value);
+        }
+    },
+    removeItem: (key) => {
+        window.localStorage.removeItem(key);
+        window.sessionStorage.removeItem(key);
+    }
+};
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        storage: almacenamientoDinamico // Le inyectamos nuestro adaptador
+    }
+});
