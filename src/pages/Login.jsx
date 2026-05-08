@@ -13,7 +13,7 @@ export default function Login() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (session) navigate('/panel');
+        if (session) navigate('/inicio');
     }, [session, navigate]);
 
     const handleLogin = async (e) => {
