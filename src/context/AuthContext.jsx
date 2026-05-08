@@ -32,7 +32,12 @@ export const AuthProvider = ({ children }) => {
 
         // --- EL ESCUDO ANTI-PANTALLA CONGELADA ---
         if (error || !data) {
-            alert("⚠️ Login exitoso, pero tu usuario no tiene un ROL asignado en la base de datos. El Administrador debe registrarte en la tabla 'perfiles'.");
+            console.error("Error al obtener perfil en Supabase:", error);
+            
+            const mensajeErrorBD = error ? `\nError DB: ${error.message} (Código: ${error.code})` : '\nError DB: No se encontró el registro (0 filas devueltas).';
+            
+            alert(`⚠️ Login exitoso, pero ocurrió un problema al leer tu perfil.\n${mensajeErrorBD}\n\n1. Tu ID de autenticación es:\n${userId}\n\n2. Revisa que el script de INSERT realmente se haya ejecutado con éxito en el SQL Editor de Supabase y que los datos existan en la tabla 'perfiles'.\n\n3. Revisa si por error insertaste el mismo usuario 2 veces (la función .single() falla si hay duplicados).`);
+            
             await supabase.auth.signOut();
             setSession(null);
             setPerfil(null);

@@ -193,6 +193,9 @@ export function useCerebroDistribucion(miEspecialidad, miModulo) {
         return p.consultorio_actual === tvNormal;
     });
 
+    // Definir pacientesEnEsperaParaMi para el Panel
+    const pacientesEnEsperaParaMi = miEspecialidad ? obtenerColaVirtual(getEspecialidadDestino()) : [];
+
     // 4. RETORNAR TODO LO QUE LA UI NECESITA
     return {
         cargando,
