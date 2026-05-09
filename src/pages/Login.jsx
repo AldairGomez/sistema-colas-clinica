@@ -9,31 +9,58 @@ export default function Login() {
     const [recordarSesion, setRecordarSesion] = useState(false); // <-- Nuevo estado para el checkbox
     const [cargando, setCargando] = useState(false);
 
-    const { session } = useAuth();
+    const { session, cargandoAuth } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
         if (session) navigate('/inicio');
     }, [session, navigate]);
 
+    // --- EL ESCUDO CONTRA EL FALSO LOGIN ---
+    if (cargandoAuth) {
+        return (
+            <div className="min-h-screen bg-blue-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-blue-400 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+                    <h2 className="text-white text-xl font-bold animate-pulse">Recuperando sesión...</h2>
+                </div>
+            </div>
+        );
+    }
+
+    // Dentro de Login.jsx
     const handleLogin = async (e) => {
         e.preventDefault();
         setCargando(true);
 
-        // --- MAGIA AQUÍ ---
-        // Le avisamos a nuestro supabaseClient.js qué tipo de almacenamiento usar ANTES de loguearnos
-        if (recordarSesion) {
-            window.localStorage.setItem('recordar_sesion', 'true');
-        } else {
-            window.localStorage.removeItem('recordar_sesion');
+        let emailParaAuth = email; // El campo 'email' en el estado es lo que escribe el usuario
+
+        // Si el usuario NO escribió un correo (ej. puso 'juan.perez' en lugar de un email)
+        if (!email.includes('@')) {
+            const { data: perfilEncontrado, error } = await supabase
+                .from('perfiles')
+                .select('correo')
+                .eq('usuario', email)
+                .single();
+
+            if (error || !perfilEncontrado) {
+                alert("El nombre de usuario no existe en la clínica.");
+                setCargando(false);
+                return;
+            }
+            emailParaAuth = perfilEncontrado.correo;
         }
 
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // Ejecutar el login real con Supabase Auth
+        const { error: authError } = await supabase.auth.signInWithPassword({
+            email: emailParaAuth,
+            password
+        });
 
-        if (error) {
-            alert("Credenciales incorrectas: " + error.message);
-            setCargando(false);
+        if (authError) {
+            alert("Credenciales incorrectas. Verifica tu usuario/correo y contraseña.");
         }
+        setCargando(false);
     };
 
     return (
@@ -47,8 +74,15 @@ export default function Login() {
 
                 <form onSubmit={handleLogin} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-1">Correo Electrónico</label>
-                        <input type="email" placeholder="dr.ejemplo@clinica.com" className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 outline-none transition-colors" value={email} onChange={e => setEmail(e.target.value)} required />
+                        <label className="block text-sm font-bold text-gray-700 mb-1">Usuario o Correo</label>
+                        <input
+                            type="text"
+                            placeholder="ej. dr.perez o dr.ejemplo@clinica.com"
+                            className="w-full p-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 outline-none transition-colors"
+                            value={email}
+                            onChange={e => setEmail(e.target.value.trim().toLowerCase())}
+                            required
+                        />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-gray-700 mb-1">Contraseña</label>
